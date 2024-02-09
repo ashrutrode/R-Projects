@@ -279,7 +279,7 @@ roman_to_int <- function(s) {
     if (is_rome_num_pres) {
       
       # Replace roman numeral with nothing
-      s <- gsub(i[[1]], "", s)
+      s <- gsub(rome_num, "", s)
       
       # Append the number value
       for (j in 1:count) {
@@ -290,7 +290,7 @@ roman_to_int <- function(s) {
     
   }
   
-  # Show output
+  # Sum array and show output
   output <- sum(arr_to_sum)
   output
   
