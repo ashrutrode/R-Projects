@@ -127,6 +127,7 @@ longest_palindromic_string <- function(s) {
 
 
 
+
 # 6. Zigzag Conversion: https://leetcode.com/problems/zigzag-conversion/
 zigzag_conversion <- function(s, numRows) {
   
@@ -301,6 +302,63 @@ roman_to_int <- function(s) {
 
 
 
+# 14. Longest Common Prefix: https://leetcode.com/problems/longest-common-prefix/
+longest_common_prefix <- function(strs) {
+  
+  # convert each string to a list
+  # find the longest string too
+  strs_array <- list()
+  max_word_length <- 0
+  for (i in strs) {
+    sub_list <- strsplit(i, "")
+    if (nchar(i) > max_word_length) {
+      max_word_length <- nchar(i)
+    }
+    strs_array <- append(strs_array, sub_list)
+  }
+  
+  # Longest Common Prefix
+  lcp <- c()
+  
+  # iterate through i letters
+  for (i in 1:max_word_length) {
+    
+    # get the ith letter of each of the j words
+    ith_letter <- c()
+    for (j in 1:length(strs_array)) {
+      ith_letter <- append(ith_letter, strs_array[[j]][[i]])
+    }
+    
+    # now let's check if all eles are the same
+    counter <- 0
+    for (k in 1:length(ith_letter)) {
+      if (ith_letter[[1]] == ith_letter[[k]]) {
+        counter <- counter + 1
+      }
+    }
+    
+    # store letter if they all match
+    if (counter == length(ith_letter)) {
+      lcp <- append(lcp, ith_letter[[1]])
+    }
+    
+    # if they don't match, break the for loop
+    else {
+     break 
+    }
+    
+  }
+  
+  # return the result
+  paste(lcp, collapse="")
+  
+}
+longest_common_prefix(c("flower","flow","flight"))
+
+
+
+
+
 # 15. 3Sum: https://leetcode.com/problems/3sum/
 three_sum <- function(nums, target) {
   
@@ -340,3 +398,47 @@ three_sum <- function(nums, target) {
   
 }
 #three_sum(c(1, 2, 3, 4, 5, 6, 7, 8, 9), 8)
+
+
+
+
+
+# 16. 3Sum Closest: https://leetcode.com/problems/3sum-closest/
+three_sum_closest <- function(nums, target) {
+  
+  # create all combos
+  combos <- list()
+  for (i in 1:(length(nums)-2)) {
+    for (j in (i+1):(length(nums)-1)) {
+      for (k in (j+1):length(nums)) {
+        
+        # create a sublist of the nums
+        sublist <- c(nums[[i]], nums[[j]], nums[[k]])
+        
+        # find their sum
+        sum <- sum(sublist)
+        
+        # find the diff as an abs value
+        abs_targ_diff <- abs(sum-target)
+        
+        # create the final sublist
+        final_sublist <- list(abs_targ_diff, sum, sublist)
+        
+        # append this result
+        combos <- append(combos, list(final_sublist))
+        
+      }
+    }
+  }
+  
+  # now arrange the sublists by the first element,
+  # the absolute value of the diff btw target and sum
+  combos <- combos[order(sapply(combos,'[[',1))]
+  
+  # the solution is the sum (second element)
+  # of the first sublist
+  #print(combos)
+  combos[[1]][[2]]
+  
+}
+#three_sum_closest(c(-1,2,1,-4), 1)
