@@ -442,3 +442,144 @@ three_sum_closest <- function(nums, target) {
   
 }
 #three_sum_closest(c(-1,2,1,-4), 1)
+
+
+
+                                     
+
+
+
+
+# 420. Strong Password Checker: https://leetcode.com/problems/strong-password-checker/description/
+strong_password_checker <- function(password) {
+  
+  # store the original pw
+  original_pw <- password
+  
+  # check if any three repeating chars are present and delete them
+  num_deletes <- 0
+  triplet_deleter <- function(password, num_deletes) {
+    
+    # check if there are at least 3 chars
+    if (nchar(password) < 3) {
+      return(list(password, num_deletes))
+    }
+    
+    # start at the third char
+    last_stage <- TRUE
+    for (i in 3:nchar(password)) { 
+      
+      # get the first three chars
+      first_char <- substring(password, i-2, i-2)
+      second_char <- substring(password, i-1, i-1)
+      third_char <- substring(password, i, i)
+      
+      # check if they're the same
+      delete_index <- 0
+      if (first_char == second_char && 
+          second_char == third_char &&
+          first_char == third_char) {
+        
+        # where to delete
+        delete_index <- i
+        
+        # create first and second part
+        first_part <- substring(password, 1, delete_index-1)
+        second_part <- substring(password, delete_index+1, nchar(password))
+        
+        # concatenate this new string
+        password <- paste(first_part, second_part, sep="")
+        
+        # iterate num_deletes
+        num_deletes <- num_deletes + 1
+        
+        # testing
+        #cat(delete_index, password, num_deletes, "\n")
+        
+        # don't move onto last stage
+        last_stage <- FALSE
+        
+        # break for loop
+        break
+        
+      }
+      
+    }
+    
+    # if last_stage is true, no repeating triplets, so show the result
+    if (last_stage) {
+      result <- list(password, num_deletes)
+      result
+    }
+    
+    # if last_stage is FALSE, call function again
+    else if (!last_stage) {
+      triplet_deleter(password, num_deletes)
+    }
+    
+  }
+  result_list <- triplet_deleter(password, num_deletes)
+  password <- result_list[[1]]
+  num_deletes <- result_list[[2]]
+  #print(paste(result_list, collapse = ' '))
+  
+  # check how many more letters and numbers are needed
+  check_letters_nums <- function(password) {
+    
+    # counter
+    need_letter_nums <- 0
+    
+    # check if there is a lowercase letter
+    if (!grepl("[a-z]", password)) {
+      need_letter_nums <- need_letter_nums + 1
+    }
+    
+    # check if there is an uppercase letter
+    if (!grepl("[A-Z]", password)) {
+      need_letter_nums <- need_letter_nums + 1
+    }
+  
+    # check if there is a digit
+    if (!grepl("\\d", password)) {
+      need_letter_nums <- need_letter_nums + 1
+    }
+  
+    # return the result
+    need_letter_nums
+    
+  }
+  need_letter_nums <- check_letters_nums(password)
+  #cat(paste(result_list, collapse = ' '), "|", num_deletes, need_letter_nums, "\n")
+  
+  # check if we're under 6 chars, factoring in the num of need_letter_nums
+  nums_for_6 <- 0
+  conditional_len <- nchar(password) + need_letter_nums
+  if (conditional_len < 6) {
+    nums_for_6 <- 6-conditional_len
+  }
+  
+  # check if we're over 20 chars, factoring in the num of need_letter_nums
+  nums_for_20 <- 0
+  if (conditional_len > 20) {
+    nums_for_20 <- conditional_len-20
+  }
+  
+  # showing all the results so far
+  #cat(original_pw, password, num_deletes, need_letter_nums, nums_for_6, nums_for_20, "\n")
+  
+  # add up all the actions
+  total_actions <- num_deletes + need_letter_nums + nums_for_6 + nums_for_20
+  total_actions
+  
+}
+#strong_password_checker('aaaaaac')
+#strong_password_checker('11111sbfjksendejkfgh8w3hrjw3ehfouewhfhlkwef')
+strong_password_checker('1337C0d3')
+
+
+
+
+
+
+
+
