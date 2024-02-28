@@ -456,23 +456,29 @@ strong_password_checker <- function(password) {
   # store the original pw
   original_pw <- password
   
-  # check if any three repeating chars are present and delete them
-  num_deletes <- 0
-  triplet_deleter <- function(password, num_deletes) {
+  # check if any three repeating chars are present and 
+  # delete the third element of the triplet 
+  num_triplets <- 0
+  triplet_deleter <- function(password, num_triplets, index) {
     
     # check if there are at least 3 chars
     if (nchar(password) < 3) {
-      return(list(password, num_deletes))
+      return(list(password, num_triplets))
     }
     
-    # start at the third char
+    # are we done?
     last_stage <- TRUE
-    for (i in 3:nchar(password)) { 
+    
+    # start at the index (initially the 3rd) char
+    for (i in index:nchar(password)) { 
       
       # get the first three chars
       first_char <- substring(password, i-2, i-2)
       second_char <- substring(password, i-1, i-1)
       third_char <- substring(password, i, i)
+      
+      # testing
+      #print(i)
       
       # check if they're the same
       delete_index <- 0
@@ -480,24 +486,17 @@ strong_password_checker <- function(password) {
           second_char == third_char &&
           first_char == third_char) {
         
-        # where to delete
-        delete_index <- i
-        
-        # create first and second part
-        first_part <- substring(password, 1, delete_index-1)
-        second_part <- substring(password, delete_index+1, nchar(password))
-        
-        # concatenate this new string
-        password <- paste(first_part, second_part, sep="")
-        
-        # iterate num_deletes
-        num_deletes <- num_deletes + 1
-        
-        # testing
-        #cat(delete_index, password, num_deletes, "\n")
+        # iterate num_triplets
+        num_triplets <- num_triplets + 1
         
         # don't move onto last stage
         last_stage <- FALSE
+        
+        # go to index+3 to stop excessive
+        # counting if more than 1 triplet 
+        # is in a row: aaaaaa should be 2,
+        # not 4
+        index <- index + 3
         
         # break for loop
         break
@@ -508,22 +507,23 @@ strong_password_checker <- function(password) {
     
     # if last_stage is true, no repeating triplets, so show the result
     if (last_stage) {
-      result <- list(password, num_deletes)
+      result <- list(password, num_triplets)
       result
     }
     
     # if last_stage is FALSE, call function again
     else if (!last_stage) {
-      triplet_deleter(password, num_deletes)
+      triplet_deleter(password, num_triplets, index)
     }
     
   }
-  result_list <- triplet_deleter(password, num_deletes)
-  password <- result_list[[1]]
-  num_deletes <- result_list[[2]]
+  result_list <- triplet_deleter(password, num_triplets, 3)
+  password_wout_triplet <- result_list[[1]]
+  num_triplets <- result_list[[2]]
   #print(paste(result_list, collapse = ' '))
   
   # check how many more letters and numbers are needed
+  # now that we've gotten rid of the triplets
   check_letters_nums <- function(password) {
     
     # counter
@@ -548,37 +548,48 @@ strong_password_checker <- function(password) {
     need_letter_nums
     
   }
-  need_letter_nums <- check_letters_nums(password)
-  #cat(paste(result_list, collapse = ' '), "|", num_deletes, need_letter_nums, "\n")
+  need_letter_nums <- check_letters_nums(password_wout_triplet)
+  #cat(original_pw, password, "|", num_triplets, need_letter_nums, "\n")
   
-  # check if we're under 6 chars, factoring in the num of need_letter_nums
-  nums_for_6 <- 0
-  conditional_len <- nchar(password) + need_letter_nums
-  if (conditional_len < 6) {
-    nums_for_6 <- 6-conditional_len
+  # least number of chars we need to add or delete based on the ORIGNIAL password
+  min_chars_added <- 0
+  min_chars_deleted <- 0
+  if (nchar(original_pw) <= 6) {
+    min_chars_added <- 6-nchar(original_pw)
   }
-  
-  # check if we're over 20 chars, factoring in the num of need_letter_nums
-  nums_for_20 <- 0
-  if (conditional_len > 20) {
-    nums_for_20 <- conditional_len-20
+  else if (nchar(original_pw) >= 20) {
+    min_chars_deleted <- nchar(original_pw)-20
   }
+    
+  # now have four pieces of information:
+    # 1. minimum num chars to add
+    # 2. minimum num chars to delete
+    # 3. num_triplets need to be either deleted or replaced 
+    # 4. need_letter_nums letter/types need to be added  
   
-  # showing all the results so far
-  #cat(original_pw, password, num_deletes, need_letter_nums, nums_for_6, nums_for_20, "\n")
+  # we need to figure out the most economical way of satisfying all four reqs
+  # the solution would be the max of the four
+  solution <- max(min_chars_added, min_chars_deleted, num_triplets, need_letter_nums)
+  #print(solution)
   
-  # add up all the actions
-  total_actions <- num_deletes + need_letter_nums + nums_for_6 + nums_for_20
-  total_actions
+  # testing
+  #stop()
+  cat("password =", original_pw, 
+      "\nminimum_chars_added =", min_chars_added, 
+      "\nminimum_chars_deleted =", min_chars_deleted, 
+      "\nnum_triplets =" , num_triplets, 
+      "\nneed_letter_nums =", need_letter_nums, 
+      "\nSolution =", solution, "\n")
   
 }
-#strong_password_checker('aaaaaac')
+#strong_password_checker('a')
+#strong_password_checker('aA1')
 #strong_password_checker('11111sbfjksendejkfgh8w3hrjw3ehfouewhfhlkwef')
-strong_password_checker('1337C0d3')
-
-
-
-
+#strong_password_checker('1337C0d3')
+#strong_password_checker('aaaDE4')
+#strong_password_checker('aaabbbccc')
+strong_password_checker('aaaaaabbb77')
+#strong_password_checker('`')
 
 
 
